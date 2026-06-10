@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Travel Operations Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --protostar-bg-base: #0a0f1f;
+            --protostar-cyan: #22d3ee;
+            --protostar-text-soft: #a9b7d0;
+            --protostar-border: rgba(34, 211, 238, 0.14);
+            --protostar-card-bg: rgba(255, 255, 255, 0.025);
+        }
+
+        body {
+            padding: 30px;
+            background-color: var(--protostar-bg-base) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--protostar-text-soft) !important;
+        }
+
+        .container-fluid {
+            max-width: 1500px;
+        }
+
+        h1,
+        h3 {
+            color: #ffffff !important;
+        }
+
+        .metric-card {
+            background: var(--protostar-card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--protostar-border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .metric-lbl {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--protostar-text-soft);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .protostar-accent {
+            color: var(--protostar-cyan);
+        }
+
+        .view-container {
+            background: var(--protostar-card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--protostar-border);
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .map-box {
+            height: 650px;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--protostar-border);
+        }
+
+        /* Unified Table UI Overrides */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(34, 211, 238, 0.04);
+            border-color: var(--protostar-border);
+            margin-bottom: 0;
+        }
+
+        .table th,
+        .table td {
+            background-color: transparent !important;
+            color: var(--protostar-text-soft) !important;
+            border-bottom: 1px solid var(--protostar-border) !important;
+        }
+
+        .table thead th {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        /* FullCalendar Protostar Theme Overrides */
+        #calendar {
+            color: #ffffff;
+            min-height: 600px;
+        }
+
+        .fc-theme-standard td,
+        .fc-theme-standard th,
+        .fc-theme-standard .fc-scrollgrid {
+            border-color: var(--protostar-border) !important;
+        }
+
+        .fc-col-header-cell-cushion,
+        .fc-daygrid-day-number {
+            color: var(--protostar-text-soft) !important;
+            text-decoration: none;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fc-event:hover {
+            transform: scale(1.02);
+            z-index: 5;
+        }
+
+        .fc .fc-toolbar-title {
+            color: #ffffff;
+        }
+
+        .fc .fc-button-primary {
+            background-color: transparent !important;
+            border-color: var(--protostar-cyan) !important;
+            color: var(--protostar-cyan) !important;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: rgba(34, 211, 238, 0.1) !important;
+        }
+
+        .fc .fc-button-primary:disabled {
+            border-color: var(--protostar-border) !important;
+            color: var(--protostar-text-soft) !important;
+        }
+
+        .fc-day-today {
+            background-color: rgba(34, 211, 238, 0.05) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <h1 class="mb-4" style="font-weight: 700;">Solo Travel Pipeline</h1>
+
+        <div class="alert alert-info d-flex align-items-center mb-4" role="alert"
+            style="background-color: rgba(34, 211, 238, 0.1); border: 1px solid var(--protostar-cyan); color: #ffffff;">
+            <span style="font-size: 1.5rem; margin-right: 15px;">🛰️</span>
+            <div>
+                <div
+                    style="font-size: 0.8rem; text-transform: uppercase; color: var(--protostar-cyan); font-weight: 600;">
+                    Live
+                    Telemetry</div>
+                <div id="current-status-text" style="font-weight: 500;">Establishing orbital lock...</div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Total Pipeline Value</div>
+                    <div class="metric-val">$2,454.76 <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Lodging Footprint</div>
+                    <div class="metric-val">$1,815.65 <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Transit Overhead</div>
+                    <div class="metric-val">$531.86 <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Cost of Events</div>
+                    <div class="metric-val">$107.25 <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-container">
+            <h3 class="mb-3" style="font-weight: 600;">Temporal Topology</h3>
+            <div class="table-responsive">
+                <table class="dataframe table table-dark table-hover align-middle custom-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>Step</th>
+      <th>Location</th>
+      <th>Arrival</th>
+      <th>Departure</th>
+      <th>Days</th>
+      <th>Inbound Transit</th>
+      <th>Transit (CAD)</th>
+      <th>Lodging</th>
+      <th>Lodging (CAD)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Lecco, Italy</td>
+      <td>May 29</td>
+      <td>June 02</td>
+      <td>4</td>
+      <td>Origin</td>
+      <td>$0.00</td>
+      <td>Hotel Lecco</td>
+      <td>$169.10</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Bled, Slovenia</td>
+      <td>June 02</td>
+      <td>June 10</td>
+      <td>8</td>
+      <td>Flixbus (Bus)</td>
+      <td>$61.95</td>
+      <td>Hostel Bledec (02/06 - 03/06)<br>Erjavčeva koča (03/06 - 04/06)<br>Koča ob izviru Soče (04/06 - 06/06)<br>Erjavčeva koča (06/06 - 09/06)<br>1A Adventure Hostel (09/06 - 10/06)</td>
+      <td>$510.51</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Berlin, Germany</td>
+      <td>June 10</td>
+      <td>June 16</td>
+      <td>6</td>
+      <td>Deutsche Bahn (Train)</td>
+      <td>$64.42</td>
+      <td>MEININGER Berlin Central Station</td>
+      <td>$378.61</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Rotterdam, Netherlands</td>
+      <td>June 17</td>
+      <td>June 20</td>
+      <td>3</td>
+      <td>European Sleeper (Night Train)</td>
+      <td>$96.63</td>
+      <td>Hostel ROOM Rotterdam</td>
+      <td>$217.25</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>London, UK</td>
+      <td>June 20</td>
+      <td>June 25</td>
+      <td>5</td>
+      <td>Eurostar (Train)</td>
+      <td>$204.53</td>
+      <td>Urbany Hostel London</td>
+      <td>$277.09</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Bristol, UK</td>
+      <td>June 25</td>
+      <td>June 29</td>
+      <td>4</td>
+      <td>Flixbus (Bus)</td>
+      <td>$8.05</td>
+      <td>The Full Moon Backpackers</td>
+      <td>$263.09</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>St Andrews, Scotland</td>
+      <td>June 29</td>
+      <td>July 06</td>
+      <td>7</td>
+      <td>CrossCountry (Train)</td>
+      <td>$96.28</td>
+      <td>TBD</td>
+      <td>$0.00</td>
+    </tr>
+  </tbody>
+</table>
+            </div>
+        </div>
+
+        <div class="view-container">
+            <h3 class="mb-3" style="font-weight: 600;">Trip Calendar</h3>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Interactive Bootstrap Modal for Calendar Click Events -->
+        <div class="modal fade" id="calendarModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content"
+                    style="background-color: var(--protostar-bg-base); border: 1px solid var(--protostar-border);">
+                    <div class="modal-header" style="border-bottom: 1px solid var(--protostar-border);">
+                        <h5 class="modal-title" id="calModalTitle"
+                            style="color: var(--protostar-cyan); font-weight: 600;"></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <!-- Empty body for JS injection -->
+                    <div class="modal-body" id="calModalBody">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-container">
+            <h3 class="mb-3" style="font-weight: 600;">Geographic Route Execution</h3>
+            <div class="map-box">
+                <!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <style>
+            /* Apply inversion matrix to the entire tile container */
+            .leaflet-tile-pane {
+                -webkit-filter: invert(100%) hue-rotate(180deg) 
+                    brightness(95%) contrast(90%);
+                filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+            }
+            
+            /* Protostar Popup Overrides */
+            .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+                background: #0a0f1f !important;
+                border: 1px solid rgba(34, 211, 238, 0.14) !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.8) !important;
+            }
+            .leaflet-popup-close-button {
+                color: #a9b7d0 !important;
+            }
+        </style>
+        
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_cdf4249195d89709a853ce60f87b7765 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/marslan390/BeautifyMarker/leaflet-beautify-marker-icon.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/marslan390/BeautifyMarker/leaflet-beautify-marker-icon.min.css"/>
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_cdf4249195d89709a853ce60f87b7765" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_cdf4249195d89709a853ce60f87b7765 = L.map(
+                "map_cdf4249195d89709a853ce60f87b7765",
+                {
+                    center: [51.0, 4.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 5,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_d95e40e8debfba6728fd82fa967f1af3 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_d95e40e8debfba6728fd82fa967f1af3.addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var marker_a15e079c977ccac3ec78849a55acb716 = L.marker(
+                [45.9005485, 9.4120248],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_78ba37814282353dd17c70f96df1e644 = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 1,
+}
+            )
+            marker_a15e079c977ccac3ec78849a55acb716.setIcon(beautify_icon_78ba37814282353dd17c70f96df1e644);
+        
+    
+        var popup_a874ab50e2d7fc1241acbd725d41e67c = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bea260de4845623f2891f4437c146771 = $(`<div id="html_bea260de4845623f2891f4437c146771" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 1: Lecco, Italy</h5>     <span style="font-size:0.85em; color:#6b7c9f;">May 29 &bull; (4 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">Origin Point</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">Hotel Lecco</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 Via Roma 12 Lecco</span>         <span style="font-size:0.8em; display:block;">📞 TBD</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             15:00</span>     </div>      </div> </div>`)[0];
+                popup_a874ab50e2d7fc1241acbd725d41e67c.setContent(html_bea260de4845623f2891f4437c146771);
+            
+        
+
+        marker_a15e079c977ccac3ec78849a55acb716.bindPopup(popup_a874ab50e2d7fc1241acbd725d41e67c)
+        ;
+
+        
+    
+    
+            marker_a15e079c977ccac3ec78849a55acb716.bindTooltip(
+                `<div>
+                     1. Lecco, Italy
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a15e079c977ccac3ec78849a55acb716.setIcon(beautify_icon_78ba37814282353dd17c70f96df1e644);
+            
+    
+            var marker_217dc7fc57ad5cddde9ba56135990223 = L.marker(
+                [46.3684202, 14.1100595],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_99b29f086aff195d81a1aad89d785abf = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 2,
+}
+            )
+            marker_217dc7fc57ad5cddde9ba56135990223.setIcon(beautify_icon_99b29f086aff195d81a1aad89d785abf);
+        
+    
+        var popup_5119bb79f5fb471e543eb3fbfcbc7d1b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_470613c1aac26a94729595033b4247e8 = $(`<div id="html_470613c1aac26a94729595033b4247e8" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 2: Bled, Slovenia</h5>     <span style="font-size:0.85em; color:#6b7c9f;">Jun 02 &bull; (8 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">Flixbus (Bus) | Arr: 12am</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">Hostel Bledec (02/06 - 03/06)<br>Erjavčeva koča (03/06 - 04/06)<br>Koča ob izviru Soče (04/06 - 06/06)<br>Erjavčeva koča (06/06 - 09/06)<br>1A Adventure Hostel (09/06 - 10/06)</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 TBD</span>         <span style="font-size:0.8em; display:block;">📞 TBD</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             TBD</span>     </div>      </div> </div>`)[0];
+                popup_5119bb79f5fb471e543eb3fbfcbc7d1b.setContent(html_470613c1aac26a94729595033b4247e8);
+            
+        
+
+        marker_217dc7fc57ad5cddde9ba56135990223.bindPopup(popup_5119bb79f5fb471e543eb3fbfcbc7d1b)
+        ;
+
+        
+    
+    
+            marker_217dc7fc57ad5cddde9ba56135990223.bindTooltip(
+                `<div>
+                     2. Bled, Slovenia
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_217dc7fc57ad5cddde9ba56135990223.setIcon(beautify_icon_99b29f086aff195d81a1aad89d785abf);
+            
+    
+            var marker_db233c04acaf8837aff6c475b32334d9 = L.marker(
+                [52.5173885, 13.3951309],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_21ef78b34b2980911310ba8fcfa6cd53 = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 3,
+}
+            )
+            marker_db233c04acaf8837aff6c475b32334d9.setIcon(beautify_icon_21ef78b34b2980911310ba8fcfa6cd53);
+        
+    
+        var popup_475309d57e32731049b1edce4b671cd8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_3db634ac9017c506a2df27f2bf7d2056 = $(`<div id="html_3db634ac9017c506a2df27f2bf7d2056" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 3: Berlin, Germany</h5>     <span style="font-size:0.85em; color:#6b7c9f;">Jun 10 &bull; (6 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">Deutsche Bahn (Train) | Arr: 10:22pm</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">MEININGER Berlin Central Station</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 Ella-Trebe-Straße 9, 10557 Berlin, Germany</span>         <span style="font-size:0.8em; display:block;">📞 TBD</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             3pm-11pm</span>     </div>                      <div style="margin-top:8px;">                     <span style="font-size:0.75em; text-transform:uppercase; color:#ec4899; opacity: 0.8; font-weight:bold; display:block;">Targeted Events</span>                     <span style="font-size:0.85em; color: #ffffff;">• Glitch Berlin</span>                 </div> </div> </div>`)[0];
+                popup_475309d57e32731049b1edce4b671cd8.setContent(html_3db634ac9017c506a2df27f2bf7d2056);
+            
+        
+
+        marker_db233c04acaf8837aff6c475b32334d9.bindPopup(popup_475309d57e32731049b1edce4b671cd8)
+        ;
+
+        
+    
+    
+            marker_db233c04acaf8837aff6c475b32334d9.bindTooltip(
+                `<div>
+                     3. Berlin, Germany
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_db233c04acaf8837aff6c475b32334d9.setIcon(beautify_icon_21ef78b34b2980911310ba8fcfa6cd53);
+            
+    
+            var marker_00b61d249d59a5ff5423d6d069479157 = L.marker(
+                [51.9244424, 4.47775],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_c3f11e51971905d6a6bfdd39a4e87876 = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 4,
+}
+            )
+            marker_00b61d249d59a5ff5423d6d069479157.setIcon(beautify_icon_c3f11e51971905d6a6bfdd39a4e87876);
+        
+    
+        var popup_d885674df464545bbf61232b55b3af06 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a72972b0c86cfd4397d4d79fd608b91b = $(`<div id="html_a72972b0c86cfd4397d4d79fd608b91b" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 4: Rotterdam, Netherlands</h5>     <span style="font-size:0.85em; color:#6b7c9f;">Jun 17 &bull; (3 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">European Sleeper (Night Train) | Arr: 8:30am</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">Hostel ROOM Rotterdam</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 Van Vollenhovenstraat 62, 3016 BK Rotterdam</span>         <span style="font-size:0.8em; display:block;">📞 +31 10 282 7277</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             2pm-10pm</span>     </div>      </div> </div>`)[0];
+                popup_d885674df464545bbf61232b55b3af06.setContent(html_a72972b0c86cfd4397d4d79fd608b91b);
+            
+        
+
+        marker_00b61d249d59a5ff5423d6d069479157.bindPopup(popup_d885674df464545bbf61232b55b3af06)
+        ;
+
+        
+    
+    
+            marker_00b61d249d59a5ff5423d6d069479157.bindTooltip(
+                `<div>
+                     4. Rotterdam, Netherlands
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_00b61d249d59a5ff5423d6d069479157.setIcon(beautify_icon_c3f11e51971905d6a6bfdd39a4e87876);
+            
+    
+            var marker_82b62b96f9846cf9949c2758e33ee3eb = L.marker(
+                [51.5074456, -0.1277653],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_45bd9cdf190aec96a5631c4f1312eac2 = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 5,
+}
+            )
+            marker_82b62b96f9846cf9949c2758e33ee3eb.setIcon(beautify_icon_45bd9cdf190aec96a5631c4f1312eac2);
+        
+    
+        var popup_4be228233a55423a47070d4d58e6d964 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_3fb90c7a88b5e9ab3e8e0a59e270fd0c = $(`<div id="html_3fb90c7a88b5e9ab3e8e0a59e270fd0c" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 5: London, UK</h5>     <span style="font-size:0.85em; color:#6b7c9f;">Jun 20 &bull; (5 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">Eurostar (Train) | Arr: 4pm</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">Urbany Hostel London</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 48-49 Prince's Square</span>         <span style="font-size:0.8em; display:block;">📞 +442078468667</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             3pm-11pm</span>     </div>                      <div style="margin-top:8px;">                     <span style="font-size:0.75em; text-transform:uppercase; color:#ec4899; opacity: 0.8; font-weight:bold; display:block;">Targeted Events</span>                     <span style="font-size:0.85em; color: #ffffff;">• Outro Festival</span>                 </div> </div> </div>`)[0];
+                popup_4be228233a55423a47070d4d58e6d964.setContent(html_3fb90c7a88b5e9ab3e8e0a59e270fd0c);
+            
+        
+
+        marker_82b62b96f9846cf9949c2758e33ee3eb.bindPopup(popup_4be228233a55423a47070d4d58e6d964)
+        ;
+
+        
+    
+    
+            marker_82b62b96f9846cf9949c2758e33ee3eb.bindTooltip(
+                `<div>
+                     5. London, UK
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_82b62b96f9846cf9949c2758e33ee3eb.setIcon(beautify_icon_45bd9cdf190aec96a5631c4f1312eac2);
+            
+    
+            var marker_16431d4aecbdc089cd5163c34f257950 = L.marker(
+                [51.4538022, -2.5972985],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_2930b145518d0344ff8cbf72701215d5 = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 6,
+}
+            )
+            marker_16431d4aecbdc089cd5163c34f257950.setIcon(beautify_icon_2930b145518d0344ff8cbf72701215d5);
+        
+    
+        var popup_bfbeecb70503c5ac225af29682eb3fce = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a745905cd931c5f3c08630d7bcf5e1dd = $(`<div id="html_a745905cd931c5f3c08630d7bcf5e1dd" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 6: Bristol, UK</h5>     <span style="font-size:0.85em; color:#6b7c9f;">Jun 25 &bull; (4 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">Flixbus (Bus) | Arr: 3:15pm</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">The Full Moon Backpackers</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 1 North St, Stokes Croft, Bristol</span>         <span style="font-size:0.8em; display:block;">📞 01179 245 007</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             3:30pm</span>     </div>                      <div style="margin-top:8px;">                     <span style="font-size:0.75em; text-transform:uppercase; color:#ec4899; opacity: 0.8; font-weight:bold; display:block;">Targeted Events</span>                     <span style="font-size:0.85em; color: #ffffff;">• BOG Bristol x Big Fat Rave</span>                 </div> </div> </div>`)[0];
+                popup_bfbeecb70503c5ac225af29682eb3fce.setContent(html_a745905cd931c5f3c08630d7bcf5e1dd);
+            
+        
+
+        marker_16431d4aecbdc089cd5163c34f257950.bindPopup(popup_bfbeecb70503c5ac225af29682eb3fce)
+        ;
+
+        
+    
+    
+            marker_16431d4aecbdc089cd5163c34f257950.bindTooltip(
+                `<div>
+                     6. Bristol, UK
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_16431d4aecbdc089cd5163c34f257950.setIcon(beautify_icon_2930b145518d0344ff8cbf72701215d5);
+            
+    
+            var marker_e75312ff7583040473f4194917ec136b = L.marker(
+                [56.3403678, -2.795044],
+                {
+}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+    
+            var beautify_icon_4e62038c7e31861c009c7aa56439a25d = new L.BeautifyIcon.icon(
+                {
+  "borderWidth": 3,
+  "borderColor": "#22d3ee",
+  "textColor": "#22d3ee",
+  "backgroundColor": "#FFF",
+  "innerIconStyle": "margin-top:0;",
+  "spin": false,
+  "isAlphaNumericIcon": true,
+  "text": 7,
+}
+            )
+            marker_e75312ff7583040473f4194917ec136b.setIcon(beautify_icon_4e62038c7e31861c009c7aa56439a25d);
+        
+    
+        var popup_7fd8f5c29da9a21074acfc1324e87c87 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2fc82c9fc916c6aca50e1e2b8e11592f = $(`<div id="html_2fc82c9fc916c6aca50e1e2b8e11592f" style="width: 100.0%; height: 100.0%;"><div     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 250px; color: #a9b7d0;">     <h5 style="margin:0 0 4px 0; color:#22d3ee; font-weight:600;">Step 7: St Andrews, Scotland</h5>     <span style="font-size:0.85em; color:#6b7c9f;">Jun 29 &bull; (7 Days)</span>     <hr style="margin: 8px 0; border:0; border-top: 1px solid rgba(34, 211, 238, 0.14);">      <div style="margin-bottom: 6px;">         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Inbound             Movement</span>         <span style="font-size:0.9em; font-weight:500; color: #ffffff;">CrossCountry (Train) | Arr: 7:30pm</span>     </div>      <div>         <span             style="font-size:0.75em; text-transform:uppercase; color:#22d3ee; opacity: 0.8; font-weight:bold; display:block;">Lodging             Entry</span>         <span style="font-size:0.9em; font-weight:500; display:block; color: #ffffff;">TBD</span>         <span style="font-size:0.8em; display:block; margin-top:2px;">📍 TBD</span>         <span style="font-size:0.8em; display:block;">📞 TBD</span>         <span style="font-size:0.8em; font-weight:500; color:#22d3ee; margin-top:4px; display:block;">Check-in:             16:00</span>     </div>      </div> </div>`)[0];
+                popup_7fd8f5c29da9a21074acfc1324e87c87.setContent(html_2fc82c9fc916c6aca50e1e2b8e11592f);
+            
+        
+
+        marker_e75312ff7583040473f4194917ec136b.bindPopup(popup_7fd8f5c29da9a21074acfc1324e87c87)
+        ;
+
+        
+    
+    
+            marker_e75312ff7583040473f4194917ec136b.bindTooltip(
+                `<div>
+                     7. St Andrews, Scotland
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_e75312ff7583040473f4194917ec136b.setIcon(beautify_icon_4e62038c7e31861c009c7aa56439a25d);
+            
+    
+            var poly_line_e835dea473e48884bf62c04486436f39 = L.polyline(
+                [[45.9005485, 9.4120248], [46.3684202, 14.1100595], [52.5173885, 13.3951309], [51.9244424, 4.47775], [51.5074456, -0.1277653], [51.4538022, -2.5972985], [56.3403678, -2.795044]],
+                {"bubblingMouseEvents": true, "color": "#22d3ee", "dashArray": "8", "dashOffset": null, "fill": false, "fillColor": "#22d3ee", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 2.5}
+            ).addTo(map_cdf4249195d89709a853ce60f87b7765);
+        
+</script>
+</html>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap bundle includes JS required for the Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+    <!-- Safely inject the Python payload as an isolated JSON block -->
+    <script id="calendar-data" type="application/json">
+            [{"title": "Lecco", "start": "2026-05-29", "end": "2026-06-02", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "Nameless Festival wrap-up & baseline node initialization", "hostel": "Hotel Lecco", "address": "Via Roma 12 Lecco", "contact": "TBD", "check_in": "15:00", "transit_in": "Origin Point", "arrival": "N/A"}}, {"title": "Bled", "start": "2026-06-02", "end": "2026-06-10", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "Hiking", "hostel": "Hostel Bledec (02/06 - 03/06)<br>Erjav\u010deva ko\u010da (03/06 - 04/06)<br>Ko\u010da ob izviru So\u010de (04/06 - 06/06)<br>Erjav\u010deva ko\u010da (06/06 - 09/06)<br>1A Adventure Hostel (09/06 - 10/06)", "address": "TBD", "contact": "TBD", "check_in": "TBD", "transit_in": "Flixbus (Bus)", "arrival": "12am"}}, {"title": "Berlin", "start": "2026-06-10", "end": "2026-06-16", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "Techno", "hostel": "MEININGER Berlin Central Station", "address": "Ella-Trebe-Stra\u00dfe 9, 10557 Berlin, Germany", "contact": "TBD", "check_in": "3pm-11pm", "transit_in": "Deutsche Bahn (Train)", "arrival": "10:22pm"}}, {"title": "Rotterdam", "start": "2026-06-17", "end": "2026-06-20", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "TBD", "hostel": "Hostel ROOM Rotterdam", "address": "Van Vollenhovenstraat 62, 3016 BK Rotterdam", "contact": "+31 10 282 7277", "check_in": "2pm-10pm", "transit_in": "European Sleeper (Night Train)", "arrival": "8:30am"}}, {"title": "London", "start": "2026-06-20", "end": "2026-06-25", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "Art & UK Garage", "hostel": "Urbany Hostel London", "address": "48-49 Prince's Square", "contact": "+442078468667", "check_in": "3pm-11pm", "transit_in": "Eurostar (Train)", "arrival": "4pm"}}, {"title": "Bristol", "start": "2026-06-25", "end": "2026-06-29", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "Drum and Bass", "hostel": "The Full Moon Backpackers", "address": "1 North St, Stokes Croft, Bristol", "contact": "01179 245 007", "check_in": "3:30pm", "transit_in": "Flixbus (Bus)", "arrival": "3:15pm"}}, {"title": "St Andrews", "start": "2026-06-29", "end": "2026-07-06", "allDay": true, "backgroundColor": "rgba(34, 211, 238, 0.1)", "borderColor": "#22d3ee", "textColor": "#ffffff", "extendedProps": {"type": "stay", "purpose": "Pipeline Merge: Reconnect with family for Caden's Graduation", "hostel": "TBD", "address": "TBD", "contact": "TBD", "check_in": "16:00", "transit_in": "CrossCountry (Train)", "arrival": "7:30pm"}}, {"title": "Transit to Bled", "start": "2026-06-02", "end": "2026-06-03", "allDay": true, "backgroundColor": "rgba(168, 85, 247, 0.15)", "borderColor": "#a855f7", "textColor": "#ffffff", "extendedProps": {"type": "transit", "mode": "Bus", "carrier": "Flixbus", "departure": "1:15pm", "arrival": "12am", "ref": "335 865 8295"}}, {"title": "Transit to Berlin", "start": "2026-06-10", "end": "2026-06-11", "allDay": true, "backgroundColor": "rgba(168, 85, 247, 0.15)", "borderColor": "#a855f7", "textColor": "#ffffff", "extendedProps": {"type": "transit", "mode": "Train", "carrier": "Deutsche Bahn", "departure": "12pm", "arrival": "10:22pm", "ref": "704952732326.00"}}, {"title": "Transit to Rotterdam", "start": "2026-06-16", "end": "2026-06-18", "allDay": true, "backgroundColor": "rgba(168, 85, 247, 0.15)", "borderColor": "#a855f7", "textColor": "#ffffff", "extendedProps": {"type": "transit", "mode": "Night Train", "carrier": "European Sleeper", "departure": "11pm", "arrival": "8:30am", "ref": "VR32-U3X3"}}, {"title": "Transit to London", "start": "2026-06-20", "end": "2026-06-21", "allDay": true, "backgroundColor": "rgba(168, 85, 247, 0.15)", "borderColor": "#a855f7", "textColor": "#ffffff", "extendedProps": {"type": "transit", "mode": "Train", "carrier": "Eurostar", "departure": "1pm", "arrival": "4pm", "ref": "6NXDDP"}}, {"title": "Transit to Bristol", "start": "2026-06-25", "end": "2026-06-26", "allDay": true, "backgroundColor": "rgba(168, 85, 247, 0.15)", "borderColor": "#a855f7", "textColor": "#ffffff", "extendedProps": {"type": "transit", "mode": "Bus", "carrier": "Flixbus", "departure": "12:30pm", "arrival": "3:15pm", "ref": "335 865 4612"}}, {"title": "Transit to St Andrews", "start": "2026-06-29", "end": "2026-06-30", "allDay": true, "backgroundColor": "rgba(168, 85, 247, 0.15)", "borderColor": "#a855f7", "textColor": "#ffffff", "extendedProps": {"type": "transit", "mode": "Train", "carrier": "CrossCountry", "departure": "11:30am", "arrival": "7:30pm", "ref": "B-XCT-ZSR0L2DPF"}}, {"title": "Glitch Berlin", "start": "2026-06-13T23:59:00", "end": "2026-06-15T06:00:00", "allDay": false, "backgroundColor": "rgba(236, 72, 153, 0.15)", "borderColor": "#ec4899", "textColor": "#ffffff", "extendedProps": {"type": "show", "venue": "RSO", "lineup": "Techno"}}, {"title": "Outro Festival", "start": "2026-06-20T23:30:00", "end": "2026-06-21T06:00:00", "allDay": false, "backgroundColor": "rgba(236, 72, 153, 0.15)", "borderColor": "#ec4899", "textColor": "#ffffff", "extendedProps": {"type": "show", "venue": "The Cause", "lineup": "UKG"}}, {"title": "BOG Bristol x Big Fat Rave", "start": "2026-06-25T18:00:00", "end": "2026-06-25T21:00:00", "allDay": false, "backgroundColor": "rgba(236, 72, 153, 0.15)", "borderColor": "#ec4899", "textColor": "#ffffff", "extendedProps": {"type": "show", "venue": "Clock Factory Bristol", "lineup": "Unknown"}}]
+        </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            // Extract and parse the isolated JSON string
+            var rawData = document.getElementById('calendar-data').textContent;
+            var eventsData = JSON.parse(rawData);
+
+            // --- Dynamic Telemetry Evaluation ---
+            const now = new Date();
+            const statusEl = document.getElementById('current-status-text');
+            let activeState = null;
+
+            // Isolate the current temporal node or edge
+            for (const event of eventsData) {
+                const start = new Date(event.start);
+                // Handle specific date parsing logic; FullCalendar end dates are exclusive
+                let end = event.end ? new Date(event.end) : new Date(start);
+
+                if (now >= start && now < end) {
+                    activeState = event;
+                    // Prioritize transit over stays if dates overlap
+                    if (event.extendedProps.type === 'transit') break;
+                }
+            }
+
+            if (activeState) {
+                const props = activeState.extendedProps;
+                if (props.type === 'stay') {
+                    statusEl.innerHTML = `Stationary at <strong>${activeState.title}</strong> &bull; Lodging: ${props.hostel}`;
+                } else if (props.type === 'transit') {
+                    statusEl.innerHTML = `In Transit: <strong>${activeState.title}</strong> &bull; ${props.carrier} (${props.mode})`;
+                }
+            } else {
+                statusEl.innerHTML = "Currently off-grid or outside pipeline parameters.";
+            }
+            // ------------------------------------
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,multiMonthYear'
+                },
+                events: eventsData,
+                eventClick: function (info) {
+                    var props = info.event.extendedProps;
+                    document.getElementById('calModalTitle').textContent = info.event.title;
+
+                    var bodyHtml = '';
+
+                    if (props.type === 'stay') {
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Inbound Transit:</strong> ${props.transit_in} (Arr: ${props.arrival})</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Lodging:</strong> ${props.hostel}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Address:</strong> ${props.address}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Check-In:</strong> ${props.check_in}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 0;"><strong style="color: #ffffff;">Objective:</strong> ${props.purpose}</p>`;
+                    } else if (props.type === 'transit') {
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Mode:</strong> ${props.mode} (${props.carrier})</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Departure:</strong> ${props.departure}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Arrival:</strong> ${props.arrival}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 0;"><strong style="color: #ffffff;">Booking Ref:</strong> ${props.ref}</p>`;
+                    } else if (props.type === 'show') {
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Venue:</strong> ${props.venue}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Start:</strong> ${info.event.start.toLocaleString()}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">End:</strong> ${info.event.end ? info.event.end.toLocaleString() : 'TBD'}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 0;"><strong style="color: #ffffff;">Lineup/Notes:</strong> ${props.lineup}</p>`;
+                    }
+
+                    document.getElementById('calModalBody').innerHTML = bodyHtml;
+
+                    var calModal = new bootstrap.Modal(document.getElementById('calendarModal'));
+                    calModal.show();
+                }
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+
+</html>

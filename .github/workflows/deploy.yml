@@ -1,0 +1,46 @@
+name: Compile & Deploy Pipeline
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'data/**'
+      - 'src/**'
+      - '.github/workflows/**'
+  workflow_dispatch: # Allows manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Initialize Python Runtime
+        run: uv python install 3.14
+
+      - name: Execute Build Pipeline
+        run: uv run src/build.py
+
+      - name: Upload Static Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # Captures the generated index.html
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

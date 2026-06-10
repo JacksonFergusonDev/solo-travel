@@ -1,0 +1,15 @@
+*~
+.DS_Store
+.direnv/
+.env
+.envrc.local
+.envrc
+.idea/
+.ruff_cache/
+.venv/
+.vscode/
+Thumbs.db
+__pycache__/
+*.nc
+.ipynb_checkpoints/
+.pipeline_cache/

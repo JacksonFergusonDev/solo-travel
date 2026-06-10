@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Travel Operations Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --protostar-bg-base: #0a0f1f;
+            --protostar-cyan: #22d3ee;
+            --protostar-text-soft: #a9b7d0;
+            --protostar-border: rgba(34, 211, 238, 0.14);
+            --protostar-card-bg: rgba(255, 255, 255, 0.025);
+        }
+
+        body {
+            padding: 30px;
+            background-color: var(--protostar-bg-base) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--protostar-text-soft) !important;
+        }
+
+        .container-fluid {
+            max-width: 1500px;
+        }
+
+        h1,
+        h3 {
+            color: #ffffff !important;
+        }
+
+        .metric-card {
+            background: var(--protostar-card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--protostar-border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .metric-lbl {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--protostar-text-soft);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .protostar-accent {
+            color: var(--protostar-cyan);
+        }
+
+        .view-container {
+            background: var(--protostar-card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--protostar-border);
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .map-box {
+            height: 650px;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--protostar-border);
+        }
+
+        /* Unified Table UI Overrides */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(34, 211, 238, 0.04);
+            border-color: var(--protostar-border);
+            margin-bottom: 0;
+        }
+
+        .table th,
+        .table td {
+            background-color: transparent !important;
+            color: var(--protostar-text-soft) !important;
+            border-bottom: 1px solid var(--protostar-border) !important;
+        }
+
+        .table thead th {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        /* FullCalendar Protostar Theme Overrides */
+        #calendar {
+            color: #ffffff;
+            min-height: 600px;
+        }
+
+        .fc-theme-standard td,
+        .fc-theme-standard th,
+        .fc-theme-standard .fc-scrollgrid {
+            border-color: var(--protostar-border) !important;
+        }
+
+        .fc-col-header-cell-cushion,
+        .fc-daygrid-day-number {
+            color: var(--protostar-text-soft) !important;
+            text-decoration: none;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fc-event:hover {
+            transform: scale(1.02);
+            z-index: 5;
+        }
+
+        .fc .fc-toolbar-title {
+            color: #ffffff;
+        }
+
+        .fc .fc-button-primary {
+            background-color: transparent !important;
+            border-color: var(--protostar-cyan) !important;
+            color: var(--protostar-cyan) !important;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: rgba(34, 211, 238, 0.1) !important;
+        }
+
+        .fc .fc-button-primary:disabled {
+            border-color: var(--protostar-border) !important;
+            color: var(--protostar-text-soft) !important;
+        }
+
+        .fc-day-today {
+            background-color: rgba(34, 211, 238, 0.05) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <h1 class="mb-4" style="font-weight: 700;">Solo Travel Pipeline</h1>
+
+        <div class="alert alert-info d-flex align-items-center mb-4" role="alert"
+            style="background-color: rgba(34, 211, 238, 0.1); border: 1px solid var(--protostar-cyan); color: #ffffff;">
+            <span style="font-size: 1.5rem; margin-right: 15px;">🛰️</span>
+            <div>
+                <div
+                    style="font-size: 0.8rem; text-transform: uppercase; color: var(--protostar-cyan); font-weight: 600;">
+                    Live
+                    Telemetry</div>
+                <div id="current-status-text" style="font-weight: 500;">Establishing orbital lock...</div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Total Pipeline Value</div>
+                    <div class="metric-val">$$${total_cad} <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Lodging Footprint</div>
+                    <div class="metric-val">$$${stay_cad} <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Transit Overhead</div>
+                    <div class="metric-val">$$${transit_cad} <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-lbl">Cost of Events</div>
+                    <div class="metric-val">$$${event_cad} <span style="font-size:0.5em; font-weight:500;">CAD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-container">
+            <h3 class="mb-3" style="font-weight: 600;">Temporal Topology</h3>
+            <div class="table-responsive">
+                ${table_html}
+            </div>
+        </div>
+
+        <div class="view-container">
+            <h3 class="mb-3" style="font-weight: 600;">Trip Calendar</h3>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Interactive Bootstrap Modal for Calendar Click Events -->
+        <div class="modal fade" id="calendarModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content"
+                    style="background-color: var(--protostar-bg-base); border: 1px solid var(--protostar-border);">
+                    <div class="modal-header" style="border-bottom: 1px solid var(--protostar-border);">
+                        <h5 class="modal-title" id="calModalTitle"
+                            style="color: var(--protostar-cyan); font-weight: 600;"></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <!-- Empty body for JS injection -->
+                    <div class="modal-body" id="calModalBody">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-container">
+            <h3 class="mb-3" style="font-weight: 600;">Geographic Route Execution</h3>
+            <div class="map-box">
+                ${map_html}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap bundle includes JS required for the Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+    <!-- Safely inject the Python payload as an isolated JSON block -->
+    <script id="calendar-data" type="application/json">
+            ${calendar_events}
+        </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            // Extract and parse the isolated JSON string
+            var rawData = document.getElementById('calendar-data').textContent;
+            var eventsData = JSON.parse(rawData);
+
+            // --- Dynamic Telemetry Evaluation ---
+            const now = new Date();
+            const statusEl = document.getElementById('current-status-text');
+            let activeState = null;
+
+            // Isolate the current temporal node or edge
+            for (const event of eventsData) {
+                const start = new Date(event.start);
+                // Handle specific date parsing logic; FullCalendar end dates are exclusive
+                let end = event.end ? new Date(event.end) : new Date(start);
+
+                if (now >= start && now < end) {
+                    activeState = event;
+                    // Prioritize transit over stays if dates overlap
+                    if (event.extendedProps.type === 'transit') break;
+                }
+            }
+
+            if (activeState) {
+                const props = activeState.extendedProps;
+                if (props.type === 'stay') {
+                    statusEl.innerHTML = `Stationary at <strong>${activeState.title}</strong> &bull; Lodging: ${props.hostel}`;
+                } else if (props.type === 'transit') {
+                    statusEl.innerHTML = `In Transit: <strong>${activeState.title}</strong> &bull; ${props.carrier} (${props.mode})`;
+                }
+            } else {
+                statusEl.innerHTML = "Currently off-grid or outside pipeline parameters.";
+            }
+            // ------------------------------------
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,multiMonthYear'
+                },
+                events: eventsData,
+                eventClick: function (info) {
+                    var props = info.event.extendedProps;
+                    document.getElementById('calModalTitle').textContent = info.event.title;
+
+                    var bodyHtml = '';
+
+                    if (props.type === 'stay') {
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Inbound Transit:</strong> ${props.transit_in} (Arr: ${props.arrival})</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Lodging:</strong> ${props.hostel}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Address:</strong> ${props.address}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Check-In:</strong> ${props.check_in}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 0;"><strong style="color: #ffffff;">Objective:</strong> ${props.purpose}</p>`;
+                    } else if (props.type === 'transit') {
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Mode:</strong> ${props.mode} (${props.carrier})</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Departure:</strong> ${props.departure}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Arrival:</strong> ${props.arrival}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 0;"><strong style="color: #ffffff;">Booking Ref:</strong> ${props.ref}</p>`;
+                    } else if (props.type === 'show') {
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Venue:</strong> ${props.venue}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">Start:</strong> ${info.event.start.toLocaleString()}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 8px;"><strong style="color: #ffffff;">End:</strong> ${info.event.end ? info.event.end.toLocaleString() : 'TBD'}</p>`;
+                        bodyHtml += `<p style="margin-bottom: 0;"><strong style="color: #ffffff;">Lineup/Notes:</strong> ${props.lineup}</p>`;
+                    }
+
+                    document.getElementById('calModalBody').innerHTML = bodyHtml;
+
+                    var calModal = new bootstrap.Modal(document.getElementById('calendarModal'));
+                    calModal.show();
+                }
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+
+</html>

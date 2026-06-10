@@ -1,0 +1,12 @@
+stay_id,hostel_name,address,contact_info,check_in_time,check_out_time,cost_local,currency,booking_ref
+nameless_exit,Hotel Lecco,Via Roma 12 Lecco,,15:00,,105,EUR,BK-9823
+julian_alps,Hostel Bledec (02/06 - 03/06),,,,,30.5,EUR,
+julian_alps,Erjavčeva koča (03/06 - 04/06),,,,,45,EUR,
+julian_alps,Koča ob izviru Soče (04/06 - 06/06),,,,,104,EUR,
+julian_alps,Erjavčeva koča (06/06 - 09/06),,,,,105,EUR,
+julian_alps,1A Adventure Hostel (09/06 - 10/06),,,,,32.5,EUR,
+solo_berlin,MEININGER Berlin Central Station,"Ella-Trebe-Straße 9, 10557 Berlin, Germany",,3pm-11pm,11am,235.1,EUR,IBE-1014-0048325
+solo_rotterdam,Hostel ROOM Rotterdam,"Van Vollenhovenstraat 62, 3016 BK Rotterdam",+31 10 282 7277,2pm-10pm,11am,134.9,EUR,ch_3Tc6IiLPwwCp2e3P1j1yPMn4
+solo_london,Urbany Hostel London,48-49 Prince's Square,+442078468667,3pm-11pm,11am,148.5,GBP,1331591281345.00
+solo_bristol,The Full Moon Backpackers,"1 North St, Stokes Croft, Bristol",01179 245 007,3:30pm,11am,141,GBP,WTB1A69357
+dundee_pickup,,,,16:00,,,,
